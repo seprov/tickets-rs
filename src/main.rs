@@ -15,31 +15,25 @@ pub fn main() {
   let mut app_state = AppState::new();
   let mut current_input = Option::<String>::None;
   let mut current_error = Option::<Error>::None;
-  while app_state != AppState::HasQuit {
+  loop {
     match app_state {
       AppState::Greeting => {
         Greeter::greet();
-        app_state = AppState::GettingInput;
-      }
-      AppState::GettingInput => match InputGetter::get_input() {
-        Ok(input) => {
-          current_input = Some(input);
-          app_state = AppState::WrappingUp;
+        match InputGetter::get_input() {
+          Ok(input) => current_input = Some(input),
+          Err(e) => current_error = Some(e),
         }
-        Err(e) => current_error = Some(e),
-      },
+        app_state = AppState::WrappingUp;
+      }
       AppState::WrappingUp => {
-        match current_input {
-          Some(ref x) => println!("Input was: {}", *x),
-          None => (),
+        if let Some(ref x) = current_input {
+          println!("Input was: {}", *x);
         }
-        match current_error {
-          Some(ref x) => println!("Error was: {}", *x),
-          None => (),
+        if let Some(ref x) = current_error {
+          println!("Error was: {}", *x);
         }
-        app_state = AppState::HasQuit;
+        break;
       }
-      AppState::HasQuit => panic!("How did this happen!"),
     }
   }
 }
