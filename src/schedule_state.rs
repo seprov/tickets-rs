@@ -4,5 +4,5 @@ pub enum ScheduleState {
   Idea,
   Defined,
   InProgress,
-  Released
+  Released,
 }

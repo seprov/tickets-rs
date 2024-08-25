@@ -3,7 +3,7 @@ pub enum AppState {
   Greeting,
   GettingInput,
   WrappingUp,
-  HasQuit
+  HasQuit,
 }
 impl AppState {
   pub(crate) fn new() -> Self {
