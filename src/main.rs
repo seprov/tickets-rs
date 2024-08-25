@@ -1,4 +1,4 @@
-use std::io::{self, Error};
+use std::io::Error;
 
 use greeter::Greeter;
 use input_getter::InputGetter;
