@@ -41,7 +41,12 @@ pub fn main() {
         }
       },
       AppState::ReadingTicket => match ticket_reading_worker::read_ticket() {
-        Ok(_) => todo!(),
+        Ok(t) => {
+          println!(
+            "ticket id read as: {}",
+            t.id.iter().map(|&b| b as char).collect::<String>()
+          )
+        }
         Err(e) => {
           current_error = Some(e);
           app_state = AppState::WrappingUp;
