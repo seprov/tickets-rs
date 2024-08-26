@@ -10,6 +10,7 @@ pub mod greeter;
 pub mod input_getter;
 pub mod schedule_state;
 pub mod ticket;
+pub mod ticket_serializer;
 
 pub fn main() {
   let mut app_state = AppState::new();
