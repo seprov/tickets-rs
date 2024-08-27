@@ -87,8 +87,9 @@ pub fn main() {
           println!("Error was: {}", *x);
         }
         if let Some(ref x) = current_ticket {
-          let file_path = ticket_path_provider::get_ticket_path_from_bytes(x.id);
+          let file_path = ticket_path_provider::get_ticket_path(&x.get_id_as_string());
           ticket_serializer::serialize(&file_path, x);
+          println!("Saved open ticket: {}", x.get_id_as_string())
         }
         break;
       }

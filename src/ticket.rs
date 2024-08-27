@@ -14,16 +14,26 @@ pub struct Ticket {
   pub schedule_state: ScheduleState,
 }
 
-fn serialize_bytes_as_str<S>(bytes: &[u8; 8], serializer: S) -> Result<S::Ok, S::Error>
-where
-  S: Serializer,
-{
-  let s: String = bytes
+impl Ticket {
+  pub fn get_id_as_string(&self) -> String {
+    get_string_from_bytes(&self.id)
+  }
+}
+
+fn get_string_from_bytes(bytes: &[u8; 8]) -> String {
+  bytes
     .iter()
     .filter(|&&b| b != 0)
     .map(|&b| b as char)
     .rev()
-    .collect();
+    .collect::<String>()
+}
+
+fn serialize_bytes_as_str<S>(bytes: &[u8; 8], serializer: S) -> Result<S::Ok, S::Error>
+where
+  S: Serializer,
+{
+  let s = get_string_from_bytes(bytes);
   serializer.serialize_str(&s)
 }
 
