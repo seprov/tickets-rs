@@ -1,6 +1,6 @@
-use std::io::{self, ErrorKind};
+use std::{io::{self, ErrorKind}, path::Path};
 
-use crate::{input_getter::get_input, ticket::Ticket, ticket_serializer};
+use crate::{input_getter::get_input, ticket::Ticket, ticket_path_provider, ticket_serializer};
 
 pub fn create_ticket() -> Result<Ticket, io::Error> {
   println!("let's create a ticket!");
@@ -9,17 +9,28 @@ pub fn create_ticket() -> Result<Ticket, io::Error> {
 
   let file_path = format!("data/tickets/{}.json", id_string);
 
-  validate_ticket_id()?;
+  validate_ticket_id(&id_string)?;
 
   println!("creating ticket");
   ticket_serializer::serialize(&file_path, &ticket)?;
   println!("created ticket: {}", id_string);
-  
+
   Ok(ticket)
 }
 
-fn validate_ticket_id() -> Result<(), io::Error> {
-  todo!()
+fn validate_ticket_id(ticket_id: &str) -> Result<(), io::Error> {
+  ticket_json_already_exists(ticket_id)?;
+  // etc
+  Ok(())
+}
+
+fn ticket_json_already_exists(ticket_id: &str) -> Result<(), io::Error> {
+  let binding = ticket_path_provider::get_ticket_path(ticket_id);
+  let path = Path::new(&binding);
+  match path.exists() {
+    true => Err(io::Error::new(ErrorKind::AlreadyExists,"ticket with that id already exists!")),
+    false => Ok(()),
+  }
 }
 
 fn get_ticket_id() -> Result<(String, [u8; 8]), io::Error> {
