@@ -1,5 +1,5 @@
 use std::{
-  collections::HashMap,
+  collections::{BTreeMap, HashMap},
   fs::{remove_file, File},
   io::{self, Read, Write},
   process::Command,
@@ -17,7 +17,7 @@ pub fn handle_ticket(ticket: &Ticket) -> Result<Ticket, io::Error> {
   p: point
   r: read ticket details
   x: save and close the ticket
-  "
+"
   );
 
   let c = input_getter::get_single_char_input()?;
@@ -44,7 +44,10 @@ fn read_ticket(ticket: &Ticket) -> Result<Ticket, io::Error> {
       None => "N/A".to_owned(),
     }
   });
-  println!("description...:\n  {}", ticket.description.trim().replace("\n","\n  "));
+  println!(
+    "description...:\n  {}",
+    ticket.description.trim().replace("\n", "\n  ")
+  );
   Ok(ticket.clone())
 }
 
@@ -52,6 +55,7 @@ fn change_estimate(ticket: &Ticket) -> Result<Ticket, io::Error> {
   if let Some(current_estimate) = ticket.estimate {
     println!("the ticket's current estimate is {}", current_estimate)
   }
+  println!("what would you like to set the estimate to?");
 
   let estimate_input = input_getter::get_single_char_input()?;
   let estimate = estimate_input.to_digit(10).ok_or(io::Error::new(
@@ -88,15 +92,43 @@ fn change_description(ticket: &Ticket) -> Result<Ticket, io::Error> {
 
 fn change_schedule_state(ticket: &Ticket) -> Result<Ticket, io::Error> {
   println!(
-    "your ticket's schedule state is currently {}",
+    "your ticket's schedule state is currently: {}",
     ticket.schedule_state
   );
   println!("what schedule state do you want?");
   let schedule_states = schedule_state_provider::get_schedule_states();
-
-  todo!()
+  let mapping = get_character_schedule_state_mapping(&schedule_states);
+  for (c, s) in &mapping {
+    println!("  {}: {}", c, s)
+  }
+  let input = input_getter::get_single_char_input()?;
+  for c in mapping.keys() {
+    if input == *c {
+      if let Some(value) = mapping.get(c) {
+        return Ok::<Ticket, io::Error>(Ticket {
+          schedule_state: (value.to_owned()),
+          ..ticket.clone()
+        });
+      } else {
+        continue;
+      }
+    } else {
+      continue;
+    };
+  }
+  Err(io::Error::new(
+    io::ErrorKind::InvalidInput,
+    "couldn't match any valid options!",
+  ))
 }
 
-fn get_character_schedule_state_mapping(schedule_states: &[String]) -> HashMap<char, String> {
-  todo!()
+fn get_character_schedule_state_mapping(schedule_states: &[String]) -> BTreeMap<char, String> {
+  let mut current_byte = b'a' - 1;
+  schedule_states
+    .iter()
+    .map(|s| {
+      current_byte += 1;
+      (current_byte as char, s.to_owned())
+    })
+    .collect()
 }

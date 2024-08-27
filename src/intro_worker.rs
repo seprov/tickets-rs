@@ -7,7 +7,7 @@ pub fn get_intro_choice() -> Result<Activities, std::io::Error> {
     "
   n: new ticket
   r: read ticket
-  "
+"
   );
 
   let c = get_single_char_input()?;
