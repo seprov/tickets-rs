@@ -17,12 +17,16 @@ pub fn deserialize(file_path: &str) -> Result<Ticket, io::Error> {
   }
 }
 
-pub fn serialize(file_path: &str, ticket: &Ticket) {
+pub fn serialize(file_path: &str, ticket: &Ticket) -> Option<io::Error> {
   match File::create(file_path) {
     Ok(file) => {
       let writer = BufWriter::new(file);
       let r: Result<(), serde_json::Error> = serde_json::to_writer(writer, ticket);
-    },
-    Err(_) => todo!(),
+      match r {
+        Ok(_) => None,
+        Err(e) => Some(io::Error::from(e)),
+      }
+    }
+    Err(e) => Some(e),
   }
 }

@@ -1,4 +1,4 @@
-use std::io::{self, ErrorKind, Read};
+use std::io::{self, ErrorKind};
 
 use crate::{
   input_getter::get_input, schedule_state::ScheduleState::Idea, ticket::Ticket, ticket_serializer,
@@ -25,11 +25,10 @@ pub fn create_ticket() -> Result<Ticket, io::Error> {
     let file_path = format!("data/tickets/{}.json", input);
     ticket_serializer::serialize(&file_path, &ticket);
 
+    println!("created ticket: {}", input);
+
     Ok(ticket)
   } else {
-    Err(io::Error::new(
-      ErrorKind::InvalidInput,
-      "too many chars!",
-    ))
+    Err(io::Error::new(ErrorKind::InvalidInput, "too many chars!"))
   }
 }
