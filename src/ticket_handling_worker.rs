@@ -1,5 +1,5 @@
 use std::{
-  collections::{BTreeMap, HashMap},
+  collections::BTreeMap,
   fs::{remove_file, File},
   io::{self, Read, Write},
   process::Command,

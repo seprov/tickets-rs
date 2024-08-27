@@ -19,7 +19,6 @@ pub mod ticket_serializer;
 
 pub fn main() {
   let mut app_state = AppState::new();
-  let mut current_input = Option::<String>::None;
   let mut current_ticket = Option::<Ticket>::None;
   let mut current_error = Option::<Error>::None;
   loop {
@@ -88,9 +87,6 @@ pub fn main() {
         }
       },
       AppState::WrappingUp => {
-        if let Some(ref x) = current_input {
-          println!("Input was: {}", *x);
-        }
         if let Some(ref x) = current_error {
           println!("Error was: {}", *x);
         }
