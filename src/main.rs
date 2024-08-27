@@ -9,13 +9,13 @@ pub mod activities;
 pub mod app_state;
 pub mod input_getter;
 pub mod intro_worker;
+pub mod path_provider;
+pub mod schedule_state_provider;
 pub mod ticket;
 pub mod ticket_creating_worker;
 pub mod ticket_handling_worker;
-pub mod ticket_path_provider;
 pub mod ticket_reading_worker;
 pub mod ticket_serializer;
-pub mod schedule_state_provider;
 
 pub fn main() {
   let mut app_state = AppState::new();
@@ -66,12 +66,15 @@ pub fn main() {
         }
       },
       AppState::HandlingTicket => match current_ticket {
-        Some(t) => match ticket_handling_worker::handle_ticket(t) {
+        Some(ref ticket) => match ticket_handling_worker::handle_ticket(ticket) {
           Ok(t) => {
             current_ticket = Some(t);
             app_state = AppState::WrappingUp;
           }
-          Err(_) => todo!(),
+          Err(e) => {
+            current_error = Some(e);
+            app_state = AppState::WrappingUp;
+          }
         },
         None => {
           current_error = Some(io::Error::new(
@@ -92,7 +95,7 @@ pub fn main() {
           println!("Error was: {}", *x);
         }
         if let Some(ref x) = current_ticket {
-          let file_path = ticket_path_provider::get_ticket_path(&x.get_id_as_string());
+          let file_path = path_provider::get_ticket_path(&x.get_id_as_string());
           ticket_serializer::serialize(&file_path, x);
           println!("Saved open ticket: {}", x.get_id_as_string())
         }

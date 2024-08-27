@@ -2,7 +2,7 @@ use core::str;
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Ticket {
   #[serde(
     serialize_with = "serialize_bytes_as_str",
@@ -11,7 +11,7 @@ pub struct Ticket {
   pub id: [u8; 8],
   pub schedule_state: String,
   pub description: String,
-  pub estimate: Option<u8>,
+  pub estimate: Option<u32>,
 }
 
 impl Ticket {

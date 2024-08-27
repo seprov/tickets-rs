@@ -17,3 +17,5 @@ pub fn get_intro_choice() -> Result<Activities, std::io::Error> {
     _ => todo!(),
   }
 }
+
+// todo, have this create necessary dirs
