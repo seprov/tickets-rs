@@ -8,6 +8,8 @@ pub fn handle_ticket(ticket: Ticket) -> Result<Ticket, io::Error> {
   print!(
     "
   s: change schedule state
+  d: add description
+  p: point
   x: save and close the ticket
   "
   );
@@ -15,12 +17,22 @@ pub fn handle_ticket(ticket: Ticket) -> Result<Ticket, io::Error> {
   let c = get_single_char_input()?;
   match c {
     's' => change_schedule_state(&ticket),
+    'd' => change_description(&ticket),
+    'p' => change_estimate(&ticket),
     'x' => Ok(ticket),
     _ => Err(io::Error::new(
       io::ErrorKind::InvalidInput,
       format!("you entered {}, which is not valid!", c),
     )),
   }
+}
+
+fn change_estimate(ticket: &Ticket) -> Result<Ticket, io::Error> {
+    todo!()
+}
+
+fn change_description(ticket: &Ticket) -> Result<Ticket, io::Error> {
+    todo!()
 }
 
 fn change_schedule_state(ticket: &Ticket) -> Result<Ticket, io::Error> {
