@@ -15,21 +15,37 @@ pub fn handle_ticket(ticket: &Ticket) -> Result<Ticket, io::Error> {
   s: change schedule state
   d: add description
   p: point
+  r: read ticket details
   x: save and close the ticket
   "
   );
 
   let c = input_getter::get_single_char_input()?;
   match c {
-    's' => change_schedule_state(&ticket),
-    'd' => change_description(&ticket),
-    'p' => change_estimate(&ticket),
+    's' => change_schedule_state(ticket),
+    'd' => change_description(ticket),
+    'p' => change_estimate(ticket),
+    'r' => read_ticket(ticket),
     'x' => Ok(ticket.clone()),
     _ => Err(io::Error::new(
       io::ErrorKind::InvalidInput,
       format!("you entered {}, which is not valid!", c),
     )),
   }
+}
+
+fn read_ticket(ticket: &Ticket) -> Result<Ticket, io::Error> {
+  println!();
+  println!("id............: {}", ticket.get_id_as_string());
+  println!("schedule state: {}", ticket.schedule_state);
+  println!("estimate......: {}", {
+    match ticket.estimate {
+      Some(x) => x.to_string(),
+      None => "N/A".to_owned(),
+    }
+  });
+  println!("description...:\n  {}", ticket.description.trim().replace("\n","\n  "));
+  Ok(ticket.clone())
 }
 
 fn change_estimate(ticket: &Ticket) -> Result<Ticket, io::Error> {
@@ -64,7 +80,10 @@ fn change_description(ticket: &Ticket) -> Result<Ticket, io::Error> {
     let _ = file.read_to_string(&mut buf)?;
   }
   remove_file(temp_file_path)?;
-  Ok(Ticket{description:buf, ..ticket.clone()})
+  Ok(Ticket {
+    description: buf,
+    ..ticket.clone()
+  })
 }
 
 fn change_schedule_state(ticket: &Ticket) -> Result<Ticket, io::Error> {
