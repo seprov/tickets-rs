@@ -7,13 +7,19 @@ pub fn create_ticket() -> Result<Ticket, io::Error> {
   let (id_string, id_array) = get_ticket_id()?;
   let ticket = Ticket::new(id_array, "Idea".to_owned());
 
-  println!("creating ticket");
   let file_path = format!("data/tickets/{}.json", id_string);
-  ticket_serializer::serialize(&file_path, &ticket);
 
+  validate_ticket_id()?;
+
+  println!("creating ticket");
+  ticket_serializer::serialize(&file_path, &ticket)?;
   println!("created ticket: {}", id_string);
-
+  
   Ok(ticket)
+}
+
+fn validate_ticket_id() -> Result<(), io::Error> {
+  todo!()
 }
 
 fn get_ticket_id() -> Result<(String, [u8; 8]), io::Error> {
