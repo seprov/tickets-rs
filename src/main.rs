@@ -56,10 +56,9 @@ pub fn main() {
       },
       AppState::ReadingTicket => match ticket_reading_worker::read_ticket() {
         Ok(t) => {
-          println!(
-            "ticket id read as: {}",
-            t.id.iter().map(|&b| b as char).collect::<String>()
-          )
+          println!("ticket id read as: {}", t.get_id_as_string());
+          current_ticket = Some(t);
+          app_state = AppState::HandlingTicket;
         }
         Err(e) => {
           current_error = Some(e);
@@ -67,7 +66,13 @@ pub fn main() {
         }
       },
       AppState::HandlingTicket => match current_ticket {
-        Some(ref t) => ticket_handling_worker::handle_ticket(&t),
+        Some(ref t) => match ticket_handling_worker::handle_ticket(&t) {
+          Ok(t) => {
+            current_ticket = Some(t);
+            app_state = AppState::WrappingUp;
+          }
+          Err(_) => todo!(),
+        },
         None => {
           current_error = Some(io::Error::new(
             io::ErrorKind::InvalidData,
