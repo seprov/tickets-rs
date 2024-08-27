@@ -2,8 +2,6 @@ use core::str;
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::schedule_state::ScheduleState;
-
 #[derive(Serialize, Deserialize)]
 pub struct Ticket {
   #[serde(

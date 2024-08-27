@@ -9,7 +9,6 @@ pub mod activities;
 pub mod app_state;
 pub mod input_getter;
 pub mod intro_worker;
-pub mod schedule_state;
 pub mod ticket;
 pub mod ticket_creating_worker;
 pub mod ticket_handling_worker;

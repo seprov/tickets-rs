@@ -1,8 +1,6 @@
-use std::{io::{self, ErrorKind}, str::FromStr};
+use std::io::{self, ErrorKind};
 
-use crate::{
-  input_getter::get_input, schedule_state::ScheduleState::Idea, ticket::Ticket, ticket_serializer,
-};
+use crate::{input_getter::get_input, ticket::Ticket, ticket_serializer};
 
 pub fn create_ticket() -> Result<Ticket, io::Error> {
   println!("let's create a ticket!");
