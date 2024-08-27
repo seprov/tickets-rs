@@ -34,7 +34,6 @@ fn get_string_from_bytes(bytes: &[u8; 8]) -> String {
     .iter()
     .filter(|&&b| b != 0)
     .map(|&b| b as char)
-    .rev()
     .collect::<String>()
 }
 

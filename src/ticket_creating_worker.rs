@@ -24,7 +24,7 @@ fn get_ticket_id() -> Result<(String, [u8; 8]), io::Error> {
     let mut buffer = [0u8; 8];
     let id_bytes = input.as_bytes();
     for (i, &b) in id_bytes.iter().enumerate().take(8) {
-      buffer[8 - (i + 1)] = b;
+      buffer[i] = b;
     }
     Ok((input.to_owned(), buffer))
   } else {
