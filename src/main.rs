@@ -16,6 +16,7 @@ pub mod ticket_handling_worker;
 pub mod ticket_path_provider;
 pub mod ticket_reading_worker;
 pub mod ticket_serializer;
+pub mod schedule_state_provider;
 
 pub fn main() {
   let mut app_state = AppState::new();
@@ -66,7 +67,7 @@ pub fn main() {
         }
       },
       AppState::HandlingTicket => match current_ticket {
-        Some(ref t) => match ticket_handling_worker::handle_ticket(&t) {
+        Some(t) => match ticket_handling_worker::handle_ticket(t) {
           Ok(t) => {
             current_ticket = Some(t);
             app_state = AppState::WrappingUp;

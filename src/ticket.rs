@@ -11,7 +11,7 @@ pub struct Ticket {
     deserialize_with = "deserialize_bytes_as_str"
   )]
   pub id: [u8; 8],
-  pub schedule_state: ScheduleState,
+  pub schedule_state: String,
 }
 
 impl Ticket {

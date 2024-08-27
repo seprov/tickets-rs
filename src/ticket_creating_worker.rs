@@ -1,4 +1,4 @@
-use std::io::{self, ErrorKind};
+use std::{io::{self, ErrorKind}, str::FromStr};
 
 use crate::{
   input_getter::get_input, schedule_state::ScheduleState::Idea, ticket::Ticket, ticket_serializer,
@@ -18,7 +18,7 @@ pub fn create_ticket() -> Result<Ticket, io::Error> {
 
     let ticket = Ticket {
       id: buffer,
-      schedule_state: Idea,
+      schedule_state: "Idea".to_owned(),
     };
 
     println!("creating ticket");
