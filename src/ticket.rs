@@ -10,11 +10,22 @@ pub struct Ticket {
   )]
   pub id: [u8; 8],
   pub schedule_state: String,
+  pub description: String,
+  pub estimate: Option<u8>,
 }
 
 impl Ticket {
   pub fn get_id_as_string(&self) -> String {
     get_string_from_bytes(&self.id)
+  }
+
+  pub fn new(id: [u8; 8], schedule_state: String) -> Self {
+    Self {
+      id,
+      schedule_state,
+      description: "".to_owned(),
+      estimate: None,
+    }
   }
 }
 
