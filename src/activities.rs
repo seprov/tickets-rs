@@ -1,4 +1,5 @@
 pub enum Activities {
   NewTicket,
-  ReadTicket
+  ReadTicket,
+  EditTicket
 }

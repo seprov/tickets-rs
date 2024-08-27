@@ -3,7 +3,8 @@ pub enum AppState {
   Greeting,
   CreatingTicket,
   ReadingTicket,
-  WrappingUp
+  WrappingUp,
+  HandlingTicket,
 }
 
 impl AppState {
