@@ -76,10 +76,6 @@ pub fn main() {
             io::ErrorKind::InvalidData,
             "we didn't have a ticket",
           ))
-          // I'm starting to think the app might be able to infer most states.
-          // eg. if we don't have a ticket loaded, ask to load one
-          //     if we have a ticket loaded, ask what to do with it
-          //     if user requests to exit, exit.
         }
       },
       AppState::WrappingUp => {
