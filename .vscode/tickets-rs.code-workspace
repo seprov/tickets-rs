@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../tickets-backup"
+		}
+	],
+	"settings": {
+		"rust-analyzer.linkedProjects": [
+			"./Cargo.toml"
+		],
+		"rust-analyzer.rustfmt.extraArgs": [
+			"--config",
+			"tab_spaces=2"
+		]
+	}
+}
