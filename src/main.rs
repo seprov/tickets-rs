@@ -7,6 +7,7 @@ use crate::app_state::AppState;
 
 pub mod activities;
 pub mod app_state;
+pub mod feature;
 pub mod input_getter;
 pub mod intro_worker;
 pub mod path_provider;
@@ -28,14 +29,9 @@ pub fn main() {
         match response {
           Ok(a) => match a {
             Activities::NewTicket => app_state = AppState::CreatingTicket,
-            Activities::ReadTicket => app_state = AppState::ReadingTicket,
-            Activities::EditTicket => {
-              current_error = Some(io::Error::new(
-                io::ErrorKind::InvalidInput,
-                "how did you get here?",
-              ));
-              app_state = AppState::WrappingUp;
-            }
+            Activities::EditTicket => app_state = AppState::ReadingTicket,
+            Activities::NewFeature => todo!(),
+            Activities::EditFeature => todo!(),
           },
           Err(e) => {
             current_error = Some(e);

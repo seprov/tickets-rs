@@ -5,15 +5,19 @@ pub fn get_intro_choice() -> Result<Activities, std::io::Error> {
   print!("what would you like to do?");
   print!(
     "
-  n: new ticket
-  r: read ticket
+  t: new ticket
+  u: edit ticket
+  f: new feature
+  g: edit feature
 "
   );
 
   let c = get_single_char_input()?;
   match c {
-    'n' => Ok(Activities::NewTicket),
-    'r' => Ok(Activities::ReadTicket),
+    't' => Ok(Activities::NewTicket),
+    'u' => Ok(Activities::EditTicket),
+    'f' => todo!(),
+    'g' => todo!(),
     _ => todo!(),
   }
 }
