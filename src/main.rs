@@ -92,7 +92,8 @@ pub fn main() {
         }
         if let Some(ref x) = current_ticket {
           let file_path = path_provider::get_ticket_path(&x.get_id_as_string());
-          match ticket_serializer::serialize(&file_path, x) {
+          let desc_file_path = path_provider::get_description_path(&x.get_id_as_string());
+          match ticket_serializer::serialize(&file_path, &desc_file_path, x) {
             Ok(_) => println!("Saved open ticket: {}", x.get_id_as_string()),
             Err(_) => println!("Failed to save ticket {}!", x.get_id_as_string()),
           }

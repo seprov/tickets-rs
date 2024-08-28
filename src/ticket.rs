@@ -10,6 +10,7 @@ pub struct Ticket {
   )]
   pub id: [u8; 8],
   pub schedule_state: String,
+  #[serde(skip_serializing)]
   pub description: String,
   pub estimate: Option<u32>,
 }

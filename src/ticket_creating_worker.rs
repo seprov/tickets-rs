@@ -1,18 +1,22 @@
-use std::{io::{self, ErrorKind}, path::Path};
+use std::{
+  io::{self, ErrorKind},
+  path::Path,
+};
 
-use crate::{input_getter::get_input, ticket::Ticket, path_provider, ticket_serializer};
+use crate::{input_getter::get_input, path_provider, ticket::Ticket, ticket_serializer};
 
 pub fn create_ticket() -> Result<Ticket, io::Error> {
   println!("let's create a ticket!");
   let (id_string, id_array) = get_ticket_id()?;
   let ticket = Ticket::new(id_array, "Idea".to_owned());
 
-  let file_path = path_provider::get_ticket_path(&id_string);
+  let ticket_path = path_provider::get_ticket_path(&id_string);
+  let description_path = path_provider::get_description_path(&id_string);
 
   validate_ticket_id(&id_string)?;
 
   println!("creating ticket");
-  ticket_serializer::serialize(&file_path, &ticket)?;
+  ticket_serializer::serialize(&ticket_path, &description_path, &ticket)?;
   println!("created ticket: {}", id_string);
 
   Ok(ticket)
@@ -28,7 +32,10 @@ fn ticket_json_already_exists(ticket_id: &str) -> Result<(), io::Error> {
   let binding = path_provider::get_ticket_path(ticket_id);
   let path = Path::new(&binding);
   match path.exists() {
-    true => Err(io::Error::new(ErrorKind::AlreadyExists,"ticket with that id already exists!")),
+    true => Err(io::Error::new(
+      ErrorKind::AlreadyExists,
+      "ticket with that id already exists!",
+    )),
     false => Ok(()),
   }
 }

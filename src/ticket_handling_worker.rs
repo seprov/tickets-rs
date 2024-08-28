@@ -13,7 +13,7 @@ pub fn handle_ticket(ticket: &Ticket) -> Result<Ticket, io::Error> {
   print!(
     "
   s: change schedule state
-  d: add description
+  d: change description
   p: point
   r: read ticket details
   x: save and close the ticket
