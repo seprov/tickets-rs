@@ -75,9 +75,11 @@ fn change_description(ticket: &Ticket) -> Result<Ticket, io::Error> {
     let mut file = File::create(temp_file_path)?;
     file.write_all(ticket.description.as_bytes())?;
   }
-  // let's just assume everyone's on Linux
+  // let's just assume everyone's on Linux :)
   let status = Command::new("vi").arg(&temp_file_path).status()?;
-  // todo do something with status
+
+  validate_exit_status(status)?;
+
   let mut buf = String::new();
   {
     let mut file = File::open(temp_file_path)?;
@@ -88,6 +90,20 @@ fn change_description(ticket: &Ticket) -> Result<Ticket, io::Error> {
     description: buf,
     ..ticket.clone()
   })
+}
+
+fn validate_exit_status(status: std::process::ExitStatus) -> Result<(), io::Error> {
+  match status.code() {
+    Some(0) => Ok(()),
+    Some(sc) => Err(io::Error::new(
+      io::ErrorKind::Other,
+      format!("status code was: {}", sc),
+    )),
+    None => Err(io::Error::new(
+      io::ErrorKind::Other,
+      "did not get a status code!",
+    )),
+  }
 }
 
 fn change_schedule_state(ticket: &Ticket) -> Result<Ticket, io::Error> {
