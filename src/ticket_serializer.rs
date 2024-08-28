@@ -16,7 +16,7 @@ pub fn deserialize(file_path: &str) -> Result<Ticket, io::Error> {
 pub fn serialize(file_path: &str, ticket: &Ticket) -> Result<(), io::Error> {
   let file = File::create(file_path)?;
   let writer = BufWriter::new(file);
-  let result: Result<(), serde_json::Error> = serde_json::to_writer(writer, ticket);
+  let result: Result<(), serde_json::Error> = serde_json::to_writer_pretty(writer, ticket);
   match result {
     Ok(_) => Ok(()),
     Err(e) => Err(io::Error::from(e)),

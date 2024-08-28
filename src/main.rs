@@ -18,6 +18,7 @@ pub mod ticket_reading_worker;
 pub mod ticket_serializer;
 pub mod bytes_to_string_converter;
 pub mod ticket_id_getter;
+pub mod ticket_id_validator;
 
 pub fn main() {
   let mut app_state = AppState::new();

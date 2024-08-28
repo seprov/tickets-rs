@@ -14,7 +14,7 @@ use crate::{
 };
 
 pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, Activities), io::Error> {
-  println!("okay, lets work on ticket {}", ticket.get_id_as_string());
+  println!("\nokay, lets work on ticket {}", ticket.get_id_as_string());
   print!("what would you like to do?");
   print!(
     "
