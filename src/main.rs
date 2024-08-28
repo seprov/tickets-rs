@@ -7,7 +7,6 @@ use crate::app_state::AppState;
 
 pub mod activities;
 pub mod app_state;
-pub mod feature;
 pub mod input_getter;
 pub mod intro_worker;
 pub mod path_provider;
@@ -17,6 +16,8 @@ pub mod ticket_creating_worker;
 pub mod ticket_handling_worker;
 pub mod ticket_reading_worker;
 pub mod ticket_serializer;
+pub mod bytes_to_string_converter;
+pub mod ticket_id_getter;
 
 pub fn main() {
   let mut app_state = AppState::new();
@@ -30,8 +31,7 @@ pub fn main() {
           Ok(a) => match a {
             Activities::NewTicket => app_state = AppState::CreatingTicket,
             Activities::EditTicket => app_state = AppState::ReadingTicket,
-            Activities::NewFeature => todo!(),
-            Activities::EditFeature => todo!(),
+            Activities::WrapUp => app_state = AppState::WrappingUp
           },
           Err(e) => {
             current_error = Some(e);
@@ -63,8 +63,10 @@ pub fn main() {
       AppState::HandlingTicket => match current_ticket {
         Some(ref ticket) => match ticket_handling_worker::handle_ticket(ticket) {
           Ok(t) => {
-            current_ticket = Some(t);
-            app_state = AppState::WrappingUp;
+            current_ticket = Some(t.0);
+            if t.1 == Activities::WrapUp {
+              app_state = AppState::WrappingUp
+            }
           }
           Err(e) => {
             current_error = Some(e);

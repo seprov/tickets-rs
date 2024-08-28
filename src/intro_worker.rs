@@ -7,8 +7,7 @@ pub fn get_intro_choice() -> Result<Activities, std::io::Error> {
     "
   t: new ticket
   u: edit ticket
-  f: new feature
-  g: edit feature
+  q: quit
 "
   );
 
@@ -16,8 +15,7 @@ pub fn get_intro_choice() -> Result<Activities, std::io::Error> {
   match c {
     't' => Ok(Activities::NewTicket),
     'u' => Ok(Activities::EditTicket),
-    'f' => todo!(),
-    'g' => todo!(),
+    'q' => Ok(Activities::WrapUp),
     _ => todo!(),
   }
 }

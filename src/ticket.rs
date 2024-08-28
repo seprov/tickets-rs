@@ -1,6 +1,6 @@
-use core::str;
+use serde::{ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};
 
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use crate::bytes_to_string_converter;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Ticket {
@@ -12,11 +12,16 @@ pub struct Ticket {
   pub schedule_state: String,
   pub description: String,
   pub estimate: Option<u32>,
+  #[serde(
+    serialize_with = "serialize_vec_bytes_as_vec_str",
+    deserialize_with = "deserialize_vec_bytes_as_vec_str"
+  )]
+  pub subtickets: Vec<[u8; 8]>,
 }
 
 impl Ticket {
   pub fn get_id_as_string(&self) -> String {
-    get_string_from_bytes(&self.id)
+    bytes_to_string_converter::get_string_from_bytes(&self.id)
   }
 
   pub fn new(id: [u8; 8], schedule_state: String) -> Self {
@@ -25,23 +30,50 @@ impl Ticket {
       schedule_state,
       description: "".to_owned(),
       estimate: None,
+      subtickets: Vec::new(),
     }
   }
 }
 
-fn get_string_from_bytes(bytes: &[u8; 8]) -> String {
-  bytes
+fn serialize_vec_bytes_as_vec_str<S>(vec: &Vec<[u8; 8]>, serializer: S) -> Result<S::Ok, S::Error>
+where
+  S: Serializer,
+{
+  let mut seq: <S as Serializer>::SerializeSeq = serializer.serialize_seq(Some(vec.len()))?;
+  let string_ids = vec
     .iter()
-    .filter(|&&b| b != 0)
-    .map(|&b| b as char)
-    .collect::<String>()
+    .map(|x| bytes_to_string_converter::get_string_from_bytes(x));
+  for id in string_ids {
+    seq.serialize_element(&id)?;
+  }
+  seq.end()
+}
+
+fn deserialize_vec_bytes_as_vec_str<'de, D>(deserializer: D) -> Result<Vec<[u8; 8]>, D::Error>
+where
+  D: Deserializer<'de>,
+{
+  let string_vec = Vec::<String>::deserialize(deserializer)?;
+
+  let mut byte_vec = Vec::with_capacity(string_vec.len());
+  for s in string_vec {
+    let mut array = [0u8; 8];
+    let bytes = s.as_bytes();
+
+    let start_index = 8usize.saturating_sub(bytes.len());
+    array[start_index..].copy_from_slice(&bytes[..bytes.len().min(8)]);
+
+    byte_vec.push(array);
+  }
+
+  Ok(byte_vec)
 }
 
 fn serialize_bytes_as_str<S>(bytes: &[u8; 8], serializer: S) -> Result<S::Ok, S::Error>
 where
   S: Serializer,
 {
-  let s = get_string_from_bytes(bytes);
+  let s = bytes_to_string_converter::get_string_from_bytes(bytes);
   serializer.serialize_str(&s)
 }
 
@@ -52,6 +84,12 @@ where
   let s = String::deserialize(deserializer)?;
   let mut array = [0u8; 8];
   let bytes = s.as_bytes();
+
+  if bytes.len() > 8 {
+    return Err(serde::de::Error::custom(
+      "String is too long to fit in [u8; 8]",
+    ));
+  }
 
   let start_index = 8usize.saturating_sub(bytes.len());
   array[start_index..].copy_from_slice(&bytes[..bytes.len().min(8)]);

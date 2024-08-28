@@ -5,9 +5,15 @@ use std::{
   process::Command,
 };
 
-use crate::{input_getter, path_provider, schedule_state_provider, ticket::Ticket};
+use crate::{
+  activities::Activities,
+  bytes_to_string_converter,
+  input_getter::{self},
+  path_provider, schedule_state_provider,
+  ticket::Ticket, ticket_id_getter,
+};
 
-pub fn handle_ticket(ticket: &Ticket) -> Result<Ticket, io::Error> {
+pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, Activities), io::Error> {
   println!("okay, lets work on ticket {}", ticket.get_id_as_string());
   print!("what would you like to do?");
   print!(
@@ -16,22 +22,64 @@ pub fn handle_ticket(ticket: &Ticket) -> Result<Ticket, io::Error> {
   d: add description
   p: point
   r: read ticket details
+  t: add subticket id
+  u: read subticket details
+  v: remove subticket id
   x: save and close the ticket
 "
   );
 
   let c = input_getter::get_single_char_input()?;
-  match c {
+
+  // this is kind of a hack but it requires fewer code changes right now
+  if c == 'x' {
+    return Ok((ticket.clone(), Activities::WrapUp));
+  }
+
+  let r: Result<Ticket, io::Error> = match c {
     's' => change_schedule_state(ticket),
     'd' => change_description(ticket),
     'p' => change_estimate(ticket),
     'r' => read_ticket(ticket),
-    'x' => Ok(ticket.clone()),
+    't' => add_subticket_id(ticket),
+    'u' => read_subtickets(ticket),
+    'v' => remove_subticket_id(ticket),
     _ => Err(io::Error::new(
       io::ErrorKind::InvalidInput,
       format!("you entered {}, which is not valid!", c),
     )),
+  };
+  r.map(|t| (t, Activities::EditTicket))
+}
+
+fn read_subtickets(ticket: &Ticket) -> Result<Ticket, io::Error> {
+  todo!()
+}
+
+fn display_subtickets_short(ticket: &Ticket) -> () {
+  println!();
+  print!("subtickets currently include: [ ");
+  for subticket in &ticket.subtickets {
+    print!(
+      "{}, ",
+      bytes_to_string_converter::get_string_from_bytes(subticket)
+    )
   }
+  print!("]\n");
+}
+
+fn add_subticket_id(ticket: &Ticket) -> Result<Ticket, io::Error> {
+  display_subtickets_short(ticket);
+  println!("Please enter the ticket id you'd like to add as a subticket:");
+  let ticket_id = ticket_id_getter::get_ticket_id()?.1;
+  let mut t = ticket.clone();
+  t.subtickets.push(ticket_id);
+  Ok(t)
+}
+
+fn remove_subticket_id(ticket: &Ticket) -> Result<Ticket, io::Error> {
+  display_subtickets_short(ticket);
+  todo!()
 }
 
 fn read_ticket(ticket: &Ticket) -> Result<Ticket, io::Error> {

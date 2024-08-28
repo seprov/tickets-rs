@@ -1,6 +1,6 @@
+#[derive(PartialEq)]
 pub enum Activities {
   NewTicket,
   EditTicket,
-  NewFeature,
-  EditFeature
+  WrapUp
 }
