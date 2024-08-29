@@ -8,5 +8,4 @@ pkgs.mkShell {
     pkgs.rustup
     pkgs.vscode
   ];
- # allowUnfree = true;
 }
