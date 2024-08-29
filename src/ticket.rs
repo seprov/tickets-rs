@@ -14,7 +14,7 @@ pub struct Ticket {
   pub estimate: Option<u32>,
   #[serde(
     serialize_with = "serialize_vec_bytes_as_vec_str",
-    deserialize_with = "deserialize_vec_bytes_as_vec_str"
+    deserialize_with = "deserialize_vec_str_as_vec_bytes"
   )]
   pub subtickets: Vec<[u8; 8]>,
 }
@@ -49,7 +49,7 @@ where
   seq.end()
 }
 
-fn deserialize_vec_bytes_as_vec_str<'de, D>(deserializer: D) -> Result<Vec<[u8; 8]>, D::Error>
+fn deserialize_vec_str_as_vec_bytes<'de, D>(deserializer: D) -> Result<Vec<[u8; 8]>, D::Error>
 where
   D: Deserializer<'de>,
 {
