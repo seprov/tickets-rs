@@ -6,14 +6,15 @@ use std::{
 };
 
 use crate::{
-  activities::Activities,
+  app_state::AppState,
   bytes_to_string_converter,
   input_getter::{self},
   path_provider, schedule_state_provider,
-  ticket::Ticket, ticket_id_getter,
+  ticket::Ticket,
+  ticket_id_getter,
 };
 
-pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, Activities), io::Error> {
+pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, AppState), io::Error> {
   println!("\nokay, lets work on ticket {}", ticket.get_id_as_string());
   print!("what would you like to do?");
   print!(
@@ -33,7 +34,7 @@ pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, Activities), io::Error>
 
   // this is kind of a hack but it requires fewer code changes right now
   if c == 'x' {
-    return Ok((ticket.clone(), Activities::WrapUp));
+    return Ok((ticket.clone(), AppState::Greeting));
   }
 
   let r: Result<Ticket, io::Error> = match c {
@@ -49,7 +50,7 @@ pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, Activities), io::Error>
       format!("you entered {}, which is not valid!", c),
     )),
   };
-  r.map(|t| (t, Activities::EditTicket))
+  r.map(|t| (t, AppState::HandlingTicket))
 }
 
 fn read_subtickets(ticket: &Ticket) -> Result<Ticket, io::Error> {
@@ -86,6 +87,14 @@ fn read_ticket(ticket: &Ticket) -> Result<Ticket, io::Error> {
   println!();
   println!("id............: {}", ticket.get_id_as_string());
   println!("schedule state: {}", ticket.schedule_state);
+  println!(
+    "subtickets....: {:?}",
+    ticket
+      .subtickets
+      .iter()
+      .map(|x| bytes_to_string_converter::get_string_from_bytes(x))
+      .collect::<Vec<String>>()
+  );
   println!("estimate......: {}", {
     match ticket.estimate {
       Some(x) => x.to_string(),
