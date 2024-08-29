@@ -1,9 +1,6 @@
-use std::{
-  io::{self, ErrorKind},
-  path::Path,
-};
+use std::io::{self, ErrorKind};
 
-use crate::{input_getter, path_provider};
+use crate::input_getter;
 
 pub fn get_ticket_id() -> Result<(String, [u8; 8]), io::Error> {
   println!("enter up to 8 1-byte characters");
@@ -15,11 +12,9 @@ pub fn get_ticket_id() -> Result<(String, [u8; 8]), io::Error> {
     for (i, &b) in id_bytes.iter().enumerate().take(8) {
       buffer[i] = b;
     }
-    
+
     Ok((input.to_owned(), buffer))
   } else {
     Err(io::Error::new(ErrorKind::InvalidInput, "too many chars!"))
   }
 }
-
-
