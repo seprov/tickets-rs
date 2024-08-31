@@ -1,6 +1,6 @@
 use std::{io::{self, ErrorKind}, path::Path};
 
-use crate::path_provider;
+use crate::data_access::path_provider;
 
 pub fn ticket_json_already_exists(ticket_id: &str) -> Result<(), io::Error> {
   let binding = path_provider::get_ticket_path(ticket_id);

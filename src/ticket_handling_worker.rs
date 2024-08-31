@@ -6,12 +6,8 @@ use std::{
 };
 
 use crate::{
-  app_state::AppState,
-  bytes_to_string_converter,
-  input_getter::{self},
-  path_provider, schedule_state_provider,
-  ticket::Ticket,
-  ticket_id_getter,
+  adapters::bytes_to_string_converter, data_access::{const_str_schedule_state_provider, path_provider}, model::app_state::AppState, subticket_view_provider, model::ticket::Ticket, user_input::{stdin_input_getter, stdin_ticket_id_getter}
+
 };
 
 pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, AppState), io::Error> {
@@ -30,7 +26,7 @@ pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, AppState), io::Error> {
 "
   );
 
-  let c = input_getter::get_single_char_input()?;
+  let c = stdin_input_getter::get_single_char_input()?;
 
   // this is kind of a hack but it requires fewer code changes right now
   if c == 'x' {
@@ -43,7 +39,7 @@ pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, AppState), io::Error> {
     'p' => change_estimate(ticket),
     'r' => read_ticket(ticket),
     't' => add_subticket_id(ticket),
-    'u' => read_subtickets(ticket),
+    'u' => subticket_view_provider::read_subtickets(ticket),
     'v' => remove_subticket_id(ticket),
     _ => Err(io::Error::new(
       io::ErrorKind::InvalidInput,
@@ -51,10 +47,6 @@ pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, AppState), io::Error> {
     )),
   };
   r.map(|t| (t, AppState::HandlingTicket))
-}
-
-fn read_subtickets(ticket: &Ticket) -> Result<Ticket, io::Error> {
-  todo!()
 }
 
 fn display_subtickets_short(ticket: &Ticket) -> () {
@@ -72,7 +64,7 @@ fn display_subtickets_short(ticket: &Ticket) -> () {
 fn add_subticket_id(ticket: &Ticket) -> Result<Ticket, io::Error> {
   display_subtickets_short(ticket);
   println!("Please enter the ticket id you'd like to add as a subticket:");
-  let ticket_id = ticket_id_getter::get_ticket_id()?.1;
+  let ticket_id = stdin_ticket_id_getter::get_ticket_id()?.1;
   let mut t = ticket.clone();
   t.subtickets.push(ticket_id);
   Ok(t)
@@ -114,7 +106,7 @@ fn change_estimate(ticket: &Ticket) -> Result<Ticket, io::Error> {
   }
   println!("what would you like to set the estimate to?");
 
-  let estimate_input = input_getter::get_single_char_input()?;
+  let estimate_input = stdin_input_getter::get_single_char_input()?;
   let estimate = estimate_input.to_digit(10).ok_or(io::Error::new(
     io::ErrorKind::InvalidInput,
     "couldn't parse estimate from input!",
@@ -169,12 +161,12 @@ fn change_schedule_state(ticket: &Ticket) -> Result<Ticket, io::Error> {
     ticket.schedule_state
   );
   println!("what schedule state do you want?");
-  let schedule_states = schedule_state_provider::get_schedule_states();
+  let schedule_states = const_str_schedule_state_provider::get_schedule_states();
   let mapping = get_character_schedule_state_mapping(&schedule_states);
   for (c, s) in &mapping {
     println!("  {}: {}", c, s)
   }
-  let input = input_getter::get_single_char_input()?;
+  let input = stdin_input_getter::get_single_char_input()?;
   for c in mapping.keys() {
     if input == *c {
       if let Some(value) = mapping.get(c) {

@@ -1,10 +1,10 @@
 use std::io::{self, ErrorKind};
 
-use crate::input_getter;
+use crate::user_input::stdin_input_getter;
 
 pub fn get_ticket_id() -> Result<(String, [u8; 8]), io::Error> {
   println!("enter up to 8 1-byte characters");
-  let binding = input_getter::get_input()?;
+  let binding = stdin_input_getter::get_input()?;
   let input = binding.trim();
   if (&input).len() <= 8 {
     let mut buffer = [0u8; 8];

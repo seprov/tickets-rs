@@ -1,23 +1,19 @@
 use std::io::{self, Error};
 
-use ticket::Ticket;
+use model::{app_state::AppState, ticket::Ticket};
+use user_input::stdin_intro_worker;
 
-use crate::app_state::AppState;
-
-pub mod app_state;
-pub mod bytes_to_string_converter;
-pub mod input_getter;
-pub mod intro_worker;
-pub mod path_provider;
-pub mod schedule_state_provider;
-pub mod ticket;
 pub mod ticket_creating_worker;
 pub mod ticket_handling_worker;
-pub mod ticket_id_getter;
 pub mod ticket_id_validator;
 pub mod ticket_reading_worker;
 pub mod ticket_saver;
 pub mod ticket_serializer;
+pub mod subticket_view_provider;
+pub mod model;
+pub mod adapters;
+pub mod user_input;
+pub mod data_access;
 
 pub fn main() {
   let mut app_state = AppState::new();
@@ -26,7 +22,7 @@ pub fn main() {
   loop {
     match app_state {
       AppState::Greeting => {
-        let response = intro_worker::get_intro_choice();
+        let response = stdin_intro_worker::prompt_for_activity();
         match response {
           Ok(a) => app_state = a,
           Err(e) => {

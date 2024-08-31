@@ -1,6 +1,6 @@
 use serde::{ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::bytes_to_string_converter;
+use crate::adapters::bytes_to_string_converter;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Ticket {
