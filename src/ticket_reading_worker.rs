@@ -1,4 +1,4 @@
-use std::{error::Error, io};
+use std::error::Error;
 
 use crate::{ data_accessors::path_provider, models::ticket::Ticket, ticket_serializer, user_input_acceptors::stdin_input_getter};
 
