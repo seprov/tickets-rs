@@ -22,12 +22,12 @@ impl Serialize for ScheduleState {
   }
 }
 
+// Pure ChatGPT for this
 impl<'de> Deserialize<'de> for ScheduleState {
   fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
   where
       D: Deserializer<'de>,
   {
-      // Define a visitor to handle the deserialization of the string
       struct ScheduleStateVisitor;
 
       impl<'de> Visitor<'de> for ScheduleStateVisitor {
@@ -56,7 +56,6 @@ impl<'de> Deserialize<'de> for ScheduleState {
           }
       }
 
-      // Use the visitor to deserialize the input
       deserializer.deserialize_str(ScheduleStateVisitor)
   }
 }
