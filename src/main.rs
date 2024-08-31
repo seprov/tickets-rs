@@ -9,11 +9,11 @@ pub mod ticket_id_validator;
 pub mod ticket_reading_worker;
 pub mod ticket_saver;
 pub mod ticket_serializer;
-pub mod subticket_view_provider;
 pub mod model;
 pub mod adapters;
 pub mod user_input;
 pub mod data_access;
+pub mod view;
 
 pub fn main() {
   let mut app_state = AppState::new();

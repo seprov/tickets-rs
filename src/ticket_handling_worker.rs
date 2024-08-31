@@ -6,11 +6,14 @@ use std::{
 };
 
 use crate::{
-  adapters::bytes_to_string_converter, data_access::{const_str_schedule_state_provider, path_provider}, model::{app_state::AppState, schedule_state::ScheduleState, ticket::Ticket}, subticket_view_provider, user_input::{stdin_input_getter, stdin_ticket_id_getter}
-
+  adapters::bytes_to_string_converter,
+  data_access::{const_str_schedule_state_provider, path_provider},
+  model::{app_state::AppState, schedule_state::ScheduleState, ticket::Ticket},
+  user_input::{stdin_input_getter, stdin_ticket_id_getter}, view::{stdout_subticket_view_provider, subticket_view_provider},
 };
 
 pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, AppState), io::Error> {
+  // stdout specific view for prompting user for next action
   println!("\nokay, lets work on ticket {}", ticket.get_id_as_string());
   print!("what would you like to do?");
   print!(
@@ -26,6 +29,7 @@ pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, AppState), io::Error> {
 "
   );
 
+  // stdin specific action picking
   let c = stdin_input_getter::get_single_char_input()?;
 
   // this is kind of a hack but it requires fewer code changes right now
@@ -49,20 +53,8 @@ pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, AppState), io::Error> {
   r.map(|t| (t, AppState::HandlingTicket))
 }
 
-fn display_subtickets_short(ticket: &Ticket) -> () {
-  println!();
-  print!("subtickets currently include: [ ");
-  for subticket in &ticket.subtickets {
-    print!(
-      "{}, ",
-      bytes_to_string_converter::get_string_from_bytes(subticket)
-    )
-  }
-  print!("]\n");
-}
-
 fn add_subticket_id(ticket: &Ticket) -> Result<Ticket, io::Error> {
-  display_subtickets_short(ticket);
+  stdout_subticket_view_provider::display_subtickets_short(ticket);
   println!("Please enter the ticket id you'd like to add as a subticket:");
   let ticket_id = stdin_ticket_id_getter::get_ticket_id()?.1;
   let mut t = ticket.clone();
@@ -71,7 +63,7 @@ fn add_subticket_id(ticket: &Ticket) -> Result<Ticket, io::Error> {
 }
 
 fn remove_subticket_id(ticket: &Ticket) -> Result<Ticket, io::Error> {
-  display_subtickets_short(ticket);
+  stdout_subticket_view_provider::display_subtickets_short(ticket);
   todo!()
 }
 
@@ -187,7 +179,9 @@ fn change_schedule_state(ticket: &Ticket) -> Result<Ticket, io::Error> {
   ))
 }
 
-fn get_character_schedule_state_mapping(schedule_states: &[ScheduleState]) -> BTreeMap<char, ScheduleState> {
+fn get_character_schedule_state_mapping(
+  schedule_states: &[ScheduleState],
+) -> BTreeMap<char, ScheduleState> {
   let mut current_byte = b'a' - 1;
   schedule_states
     .iter()
