@@ -6,7 +6,7 @@ use std::{
 };
 
 use crate::{
-  adapters::bytes_to_string_converter, data_access::{const_str_schedule_state_provider, path_provider}, model::app_state::AppState, subticket_view_provider, model::ticket::Ticket, user_input::{stdin_input_getter, stdin_ticket_id_getter}
+  adapters::bytes_to_string_converter, data_access::{const_str_schedule_state_provider, path_provider}, model::{app_state::AppState, schedule_state::ScheduleState, ticket::Ticket}, subticket_view_provider, user_input::{stdin_input_getter, stdin_ticket_id_getter}
 
 };
 
@@ -187,7 +187,7 @@ fn change_schedule_state(ticket: &Ticket) -> Result<Ticket, io::Error> {
   ))
 }
 
-fn get_character_schedule_state_mapping(schedule_states: &[String]) -> BTreeMap<char, String> {
+fn get_character_schedule_state_mapping(schedule_states: &[ScheduleState]) -> BTreeMap<char, ScheduleState> {
   let mut current_byte = b'a' - 1;
   schedule_states
     .iter()

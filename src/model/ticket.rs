@@ -2,6 +2,8 @@ use serde::{ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer}
 
 use crate::adapters::bytes_to_string_converter;
 
+use super::schedule_state::ScheduleState;
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Ticket {
   #[serde(
@@ -9,7 +11,7 @@ pub struct Ticket {
     deserialize_with = "deserialize_bytes_as_str"
   )]
   pub id: [u8; 8],
-  pub schedule_state: String,
+  pub schedule_state: ScheduleState,
   pub description: String,
   pub estimate: Option<u32>,
   #[serde(
@@ -27,7 +29,7 @@ impl Ticket {
   pub fn new(id: [u8; 8], schedule_state: String) -> Self {
     Self {
       id,
-      schedule_state,
+      schedule_state: ScheduleState::from_str(&schedule_state),
       description: "".to_owned(),
       estimate: None,
       subtickets: Vec::new(),

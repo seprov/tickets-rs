@@ -1,6 +1,6 @@
 use std::{collections::HashMap, io};
 
-use crate::{data_access::const_str_schedule_state_provider, model::ticket::Ticket};
+use crate::{data_access::const_str_schedule_state_provider, model::{schedule_state::ScheduleState, ticket::Ticket}};
 
 pub fn read_subtickets(ticket: &Ticket) -> Result<Ticket, io::Error> {
   let mut hashmap = get_schedule_states_as_hashmap();
@@ -10,17 +10,17 @@ pub fn read_subtickets(ticket: &Ticket) -> Result<Ticket, io::Error> {
   todo!();
 }
 
-fn get_schedule_states_as_hashmap() -> HashMap<String, Vec<[u8; 8]>> {
-  HashMap::<String, Vec<[u8; 8]>>::from_iter(
+fn get_schedule_states_as_hashmap() -> HashMap<ScheduleState, Vec<[u8; 8]>> {
+  HashMap::<ScheduleState, Vec<[u8; 8]>>::from_iter(
     const_str_schedule_state_provider::get_schedule_states()
       .iter()
-      .map(|x| (x.to_owned(), Vec::new())),
+      .map(|x| (x.clone(), Vec::new())),
   )
 }
 
-fn add_ticket_to_hashmap(ticket: &Ticket, hashmap: &mut HashMap<String, Vec<[u8; 8]>>) {
+fn add_ticket_to_hashmap(ticket: &Ticket, hashmap: &mut HashMap<ScheduleState, Vec<[u8; 8]>>) {
   hashmap
-    .entry(ticket.schedule_state.to_owned())
+    .entry(ticket.schedule_state.clone())
     .or_insert(Vec::new())
     .push(ticket.id);
 }
