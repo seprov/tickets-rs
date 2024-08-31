@@ -6,7 +6,7 @@ use crate::{
   adapters::bytes_to_string_converter,
   data_accessors::{const_str_schedule_state_provider, path_provider},
   models::{app_state::AppState, schedule_state::ScheduleState, ticket::Ticket},
-  user_input_acceptors::{stdin_input_getter, stdin_ticket_id_getter}, views::{stdout_subticket_view_provider, subticket_view_provider},
+  user_input_acceptors::{stdin_input_getter, stdin_ticket_id_getter}, view_providers::{stdout_subticket_view_provider, subticket_view_provider},
 };
 
 pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, AppState), Box<dyn Error>> {

@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use crate::{
-  models::ticket::Ticket, ticket_id_validator, ticket_serializer,
+  models::ticket::Ticket, data_accessors::json_ticket_id_validator, ticket_serializer,
   user_input_acceptors::stdin_ticket_id_getter,
 };
 
@@ -17,7 +17,7 @@ impl TicketCreatingWorker for StdinTicketCreatingWorker {
     let (id_string, id_array) = stdin_ticket_id_getter::get_ticket_id()?;
 
     // ticket json datastore specific ticket already exists validation
-    ticket_id_validator::ticket_json_already_exists(&id_string)?;
+    json_ticket_id_validator::ticket_already_exists(&id_string)?;
 
     let ticket = Ticket::new(id_array, "Idea".to_owned());
 

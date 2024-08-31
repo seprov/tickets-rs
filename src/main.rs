@@ -11,13 +11,12 @@ pub mod adapters;
 pub mod data_accessors;
 pub mod models;
 pub mod ticket_handling_worker;
-pub mod ticket_id_validator;
 pub mod ticket_reading_worker;
 pub mod ticket_saver;
 pub mod ticket_serializer;
 pub mod user_input_acceptors;
 pub mod workers;
-pub mod views;
+pub mod view_providers;
 
 pub fn main() {
   let mut app_state = AppState::new();
