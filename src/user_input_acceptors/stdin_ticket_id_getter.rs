@@ -1,6 +1,6 @@
 use std::io::{self, ErrorKind};
 
-use crate::user_input::stdin_input_getter;
+use crate::user_input_acceptors::stdin_input_getter;
 
 pub fn get_ticket_id() -> Result<(String, [u8; 8]), io::Error> {
   println!("enter up to 8 1-byte characters");

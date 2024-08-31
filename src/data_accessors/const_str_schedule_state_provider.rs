@@ -1,4 +1,4 @@
-use crate::model::schedule_state::ScheduleState;
+use crate::models::schedule_state::ScheduleState;
 
 pub const SCHEDULE_STATES: [&'static str; 4] = ["Idea", "Defined", "In-progress", "Released"];
 

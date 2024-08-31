@@ -1,8 +1,8 @@
-use std::{collections::HashMap, io};
+use std::{collections::HashMap, error::Error, io};
 
-use crate::{data_access::const_str_schedule_state_provider, model::{schedule_state::ScheduleState, ticket::Ticket}};
+use crate::{data_accessors::const_str_schedule_state_provider, models::{schedule_state::ScheduleState, ticket::Ticket}};
 
-pub fn read_subtickets(ticket: &Ticket) -> Result<Ticket, io::Error> {
+pub fn read_subtickets(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
   let mut hashmap = get_schedule_states_as_hashmap();
   add_ticket_to_hashmap(ticket, &mut hashmap);
   for st in &ticket.subtickets {}

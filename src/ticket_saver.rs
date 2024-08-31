@@ -1,4 +1,4 @@
-use crate::{data_access::path_provider, model::ticket::Ticket, ticket_serializer};
+use crate::{data_accessors::path_provider, models::ticket::Ticket, ticket_serializer};
 
 pub fn save_ticket(x: &Ticket) {
   let file_path = path_provider::get_ticket_path(&x.get_id_as_string());

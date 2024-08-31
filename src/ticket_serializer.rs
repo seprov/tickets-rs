@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::{self, BufReader, BufWriter};
 
-use crate::model::ticket::Ticket;
+use crate::models::ticket::Ticket;
 
 pub fn deserialize(file_path: &str) -> Result<Ticket, io::Error> {
   let file = File::open(file_path)?;

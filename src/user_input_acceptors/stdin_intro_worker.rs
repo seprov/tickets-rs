@@ -1,6 +1,8 @@
-use crate::{model::app_state::AppState, user_input::stdin_input_getter::get_single_char_input};
+use std::error::Error;
 
-pub fn prompt_for_activity() -> Result<AppState, std::io::Error> {
+use crate::{models::app_state::AppState, user_input_acceptors::stdin_input_getter::get_single_char_input};
+
+pub fn prompt_for_activity() -> Result<AppState, Box<dyn Error>> {
   // this is a stdout specific view for picking the app state
   println!("\nthis is tickets-rs!");
   print!("what would you like to do?");

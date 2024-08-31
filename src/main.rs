@@ -1,24 +1,28 @@
-use std::io::{self, Error};
+use std::{
+  error::Error,
+  io::{self},
+};
 
-use model::{app_state::AppState, ticket::Ticket};
-use user_input::stdin_intro_worker;
+use models::{app_state::AppState, ticket::Ticket};
+use user_input_acceptors::stdin_intro_worker;
+use workers::{stdin_ticket_creating_worker, ticket_creating_worker::TicketCreatingWorker};
 
-pub mod ticket_creating_worker;
+pub mod adapters;
+pub mod data_accessors;
+pub mod models;
 pub mod ticket_handling_worker;
 pub mod ticket_id_validator;
 pub mod ticket_reading_worker;
 pub mod ticket_saver;
 pub mod ticket_serializer;
-pub mod model;
-pub mod adapters;
-pub mod user_input;
-pub mod data_access;
-pub mod view;
+pub mod user_input_acceptors;
+pub mod workers;
+pub mod views;
 
 pub fn main() {
   let mut app_state = AppState::new();
   let mut current_ticket = Option::<Ticket>::None;
-  let mut current_error = Option::<Error>::None;
+  let mut current_error = Option::<Box<dyn Error>>::None;
   loop {
     match app_state {
       AppState::Greeting => {
@@ -31,16 +35,18 @@ pub fn main() {
           }
         }
       }
-      AppState::CreatingTicket => match ticket_creating_worker::create_ticket() {
-        Ok(t) => {
-          current_ticket = Some(t);
-          app_state = AppState::HandlingTicket;
+      AppState::CreatingTicket => {
+        match stdin_ticket_creating_worker::StdinTicketCreatingWorker::create_ticket() {
+          Ok(t) => {
+            current_ticket = Some(t);
+            app_state = AppState::HandlingTicket;
+          }
+          Err(e) => {
+            current_error = Some(e);
+            app_state = AppState::WrappingUp;
+          }
         }
-        Err(e) => {
-          current_error = Some(e);
-          app_state = AppState::WrappingUp;
-        }
-      },
+      }
       AppState::ReadingTicket => match ticket_reading_worker::read_ticket() {
         Ok(t) => {
           println!("ticket id read as: {}", t.get_id_as_string());
@@ -65,10 +71,10 @@ pub fn main() {
           }
         },
         None => {
-          current_error = Some(io::Error::new(
+          current_error = Some(Box::new(io::Error::new(
             io::ErrorKind::InvalidData,
             "we didn't have a ticket",
-          ))
+          )))
         }
       },
       AppState::WrappingUp => {

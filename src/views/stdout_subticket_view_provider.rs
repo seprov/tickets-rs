@@ -1,4 +1,4 @@
-use crate::{adapters::bytes_to_string_converter, model::ticket::Ticket};
+use crate::{adapters::bytes_to_string_converter, models::ticket::Ticket};
 
 pub(crate) fn display_subtickets_short(ticket: &Ticket) -> () {
   println!();

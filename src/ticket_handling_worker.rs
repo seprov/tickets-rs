@@ -1,18 +1,15 @@
 use std::{
-  collections::BTreeMap,
-  fs::{remove_file, File},
-  io::{self, Read, Write},
-  process::Command,
+  collections::BTreeMap, error::Error, fs::{remove_file, File}, io::{self, Read, Write}, process::Command
 };
 
 use crate::{
   adapters::bytes_to_string_converter,
-  data_access::{const_str_schedule_state_provider, path_provider},
-  model::{app_state::AppState, schedule_state::ScheduleState, ticket::Ticket},
-  user_input::{stdin_input_getter, stdin_ticket_id_getter}, view::{stdout_subticket_view_provider, subticket_view_provider},
+  data_accessors::{const_str_schedule_state_provider, path_provider},
+  models::{app_state::AppState, schedule_state::ScheduleState, ticket::Ticket},
+  user_input_acceptors::{stdin_input_getter, stdin_ticket_id_getter}, views::{stdout_subticket_view_provider, subticket_view_provider},
 };
 
-pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, AppState), io::Error> {
+pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, AppState), Box<dyn Error>> {
   // stdout specific view for prompting user for next action
   println!("\nokay, lets work on ticket {}", ticket.get_id_as_string());
   print!("what would you like to do?");
@@ -37,7 +34,7 @@ pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, AppState), io::Error> {
     return Ok((ticket.clone(), AppState::Greeting));
   }
 
-  let r: Result<Ticket, io::Error> = match c {
+  let r: Result<Ticket, Box<dyn Error>> = match c {
     's' => change_schedule_state(ticket),
     'd' => change_description(ticket),
     'p' => change_estimate(ticket),
@@ -45,15 +42,15 @@ pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, AppState), io::Error> {
     't' => add_subticket_id(ticket),
     'u' => subticket_view_provider::read_subtickets(ticket),
     'v' => remove_subticket_id(ticket),
-    _ => Err(io::Error::new(
+    _ => Err(Box::new(io::Error::new(
       io::ErrorKind::InvalidInput,
       format!("you entered {}, which is not valid!", c),
-    )),
+    ))),
   };
   r.map(|t| (t, AppState::HandlingTicket))
 }
 
-fn add_subticket_id(ticket: &Ticket) -> Result<Ticket, io::Error> {
+fn add_subticket_id(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
   stdout_subticket_view_provider::display_subtickets_short(ticket);
   println!("Please enter the ticket id you'd like to add as a subticket:");
   let ticket_id = stdin_ticket_id_getter::get_ticket_id()?.1;
@@ -62,12 +59,12 @@ fn add_subticket_id(ticket: &Ticket) -> Result<Ticket, io::Error> {
   Ok(t)
 }
 
-fn remove_subticket_id(ticket: &Ticket) -> Result<Ticket, io::Error> {
+fn remove_subticket_id(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
   stdout_subticket_view_provider::display_subtickets_short(ticket);
   todo!()
 }
 
-fn read_ticket(ticket: &Ticket) -> Result<Ticket, io::Error> {
+fn read_ticket(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
   println!();
   println!("id............: {}", ticket.get_id_as_string());
   println!("schedule state: {}", ticket.schedule_state);
@@ -92,7 +89,7 @@ fn read_ticket(ticket: &Ticket) -> Result<Ticket, io::Error> {
   Ok(ticket.clone())
 }
 
-fn change_estimate(ticket: &Ticket) -> Result<Ticket, io::Error> {
+fn change_estimate(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
   if let Some(current_estimate) = ticket.estimate {
     println!("the ticket's current estimate is {}", current_estimate)
   }
@@ -110,7 +107,7 @@ fn change_estimate(ticket: &Ticket) -> Result<Ticket, io::Error> {
   })
 }
 
-fn change_description(ticket: &Ticket) -> Result<Ticket, io::Error> {
+fn change_description(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
   let temp_file_path = &path_provider::get_temp_file_path(&ticket.get_id_as_string());
   {
     let mut file = File::create(temp_file_path)?;
@@ -133,21 +130,21 @@ fn change_description(ticket: &Ticket) -> Result<Ticket, io::Error> {
   })
 }
 
-fn validate_exit_status(status: std::process::ExitStatus) -> Result<(), io::Error> {
+fn validate_exit_status(status: std::process::ExitStatus) -> Result<(), Box<dyn Error>> {
   match status.code() {
     Some(0) => Ok(()),
-    Some(sc) => Err(io::Error::new(
+    Some(sc) => Err(Box::new(io::Error::new(
       io::ErrorKind::Other,
       format!("status code was: {}", sc),
-    )),
-    None => Err(io::Error::new(
+    ))),
+    None => Err(Box::new(io::Error::new(
       io::ErrorKind::Other,
       "did not get a status code!",
-    )),
+    ))),
   }
 }
 
-fn change_schedule_state(ticket: &Ticket) -> Result<Ticket, io::Error> {
+fn change_schedule_state(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
   println!(
     "your ticket's schedule state is currently: {}",
     ticket.schedule_state
@@ -162,7 +159,7 @@ fn change_schedule_state(ticket: &Ticket) -> Result<Ticket, io::Error> {
   for c in mapping.keys() {
     if input == *c {
       if let Some(value) = mapping.get(c) {
-        return Ok::<Ticket, io::Error>(Ticket {
+        return Ok::<Ticket, Box<dyn Error>>(Ticket {
           schedule_state: (value.to_owned()),
           ..ticket.clone()
         });
@@ -173,10 +170,10 @@ fn change_schedule_state(ticket: &Ticket) -> Result<Ticket, io::Error> {
       continue;
     };
   }
-  Err(io::Error::new(
+  Err(Box::new(io::Error::new(
     io::ErrorKind::InvalidInput,
     "couldn't match any valid options!",
-  ))
+  )))
 }
 
 fn get_character_schedule_state_mapping(
