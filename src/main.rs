@@ -22,6 +22,8 @@ pub fn main() {
   let mut app_state = AppState::new();
   let mut current_ticket = Option::<Ticket>::None;
   let mut current_error = Option::<Box<dyn Error>>::None;
+
+  let stdin_ticket_creating_worker = stdin_ticket_creating_worker::StdinTicketCreatingWorker::new();
   loop {
     match app_state {
       AppState::Greeting => {
