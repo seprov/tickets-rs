@@ -1,8 +1,8 @@
 use std::io::{self, ErrorKind};
 
-use crate::user_input_acceptors::stdin_input_getter;
+use crate::{models::ticket_id::TicketId, user_input_acceptors::stdin_input_getter};
 
-pub fn get_ticket_id() -> Result<(String, [u8; 8]), io::Error> {
+pub fn get_ticket_id() -> Result<TicketId, io::Error> {
   println!("enter up to 8 1-byte characters");
   let binding = stdin_input_getter::get_input()?;
   let input = binding.trim();
@@ -13,7 +13,7 @@ pub fn get_ticket_id() -> Result<(String, [u8; 8]), io::Error> {
       buffer[i] = b;
     }
 
-    Ok((input.to_owned(), buffer))
+    Ok(TicketId::from(buffer))
   } else {
     Err(io::Error::new(ErrorKind::InvalidInput, "too many chars!"))
   }

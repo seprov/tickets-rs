@@ -1,8 +1,6 @@
 use serde::{ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::adapters::bytes_to_string_converter;
-
-use super::schedule_state::ScheduleState;
+use super::{schedule_state::ScheduleState, ticket_id::TicketId};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Ticket {
@@ -10,7 +8,7 @@ pub struct Ticket {
     serialize_with = "serialize_bytes_as_str",
     deserialize_with = "deserialize_bytes_as_str"
   )]
-  pub id: [u8; 8],
+  pub id: TicketId,
   pub schedule_state: ScheduleState,
   pub description: String,
   pub estimate: Option<u32>,
@@ -18,15 +16,11 @@ pub struct Ticket {
     serialize_with = "serialize_vec_bytes_as_vec_str",
     deserialize_with = "deserialize_vec_str_as_vec_bytes"
   )]
-  pub subtickets: Vec<[u8; 8]>,
+  pub subtickets: Vec<TicketId>,
 }
 
 impl Ticket {
-  pub fn get_id_as_string(&self) -> String {
-    bytes_to_string_converter::get_string_from_bytes(&self.id)
-  }
-
-  pub fn new(id: [u8; 8], schedule_state: String) -> Self {
+  pub fn new(id: TicketId, schedule_state: String) -> Self {
     Self {
       id,
       schedule_state: ScheduleState::from_str(&schedule_state),
@@ -37,21 +31,19 @@ impl Ticket {
   }
 }
 
-fn serialize_vec_bytes_as_vec_str<S>(vec: &Vec<[u8; 8]>, serializer: S) -> Result<S::Ok, S::Error>
+fn serialize_vec_bytes_as_vec_str<S>(vec: &Vec<TicketId>, serializer: S) -> Result<S::Ok, S::Error>
 where
   S: Serializer,
 {
   let mut seq: <S as Serializer>::SerializeSeq = serializer.serialize_seq(Some(vec.len()))?;
-  let string_ids = vec
-    .iter()
-    .map(|x| bytes_to_string_converter::get_string_from_bytes(x));
+  let string_ids = vec.iter().map(|x| x.to_string());
   for id in string_ids {
     seq.serialize_element(&id)?;
   }
   seq.end()
 }
 
-fn deserialize_vec_str_as_vec_bytes<'de, D>(deserializer: D) -> Result<Vec<[u8; 8]>, D::Error>
+fn deserialize_vec_str_as_vec_bytes<'de, D>(deserializer: D) -> Result<Vec<TicketId>, D::Error>
 where
   D: Deserializer<'de>,
 {
@@ -65,21 +57,20 @@ where
     let start_index = 8usize.saturating_sub(bytes.len());
     array[start_index..].copy_from_slice(&bytes[..bytes.len().min(8)]);
 
-    byte_vec.push(array);
+    byte_vec.push(TicketId::from(array));
   }
 
   Ok(byte_vec)
 }
 
-fn serialize_bytes_as_str<S>(bytes: &[u8; 8], serializer: S) -> Result<S::Ok, S::Error>
+fn serialize_bytes_as_str<S>(bytes: &TicketId, serializer: S) -> Result<S::Ok, S::Error>
 where
   S: Serializer,
 {
-  let s = bytes_to_string_converter::get_string_from_bytes(bytes);
-  serializer.serialize_str(&s)
+  serializer.serialize_str(&bytes.to_string())
 }
 
-fn deserialize_bytes_as_str<'de, D>(deserializer: D) -> Result<[u8; 8], D::Error>
+fn deserialize_bytes_as_str<'de, D>(deserializer: D) -> Result<TicketId, D::Error>
 where
   D: Deserializer<'de>,
 {
@@ -96,5 +87,5 @@ where
   let start_index = 8usize.saturating_sub(bytes.len());
   array[start_index..].copy_from_slice(&bytes[..bytes.len().min(8)]);
 
-  Ok(array)
+  Ok(TicketId::from(array))
 }

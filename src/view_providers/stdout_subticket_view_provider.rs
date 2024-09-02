@@ -1,13 +1,10 @@
-use crate::{adapters::bytes_to_string_converter, models::ticket::Ticket};
+use crate::models::ticket::Ticket;
 
 pub(crate) fn display_subtickets_short(ticket: &Ticket) -> () {
   println!();
   print!("subtickets currently include: [ ");
-  for subticket in &ticket.subtickets {
-    print!(
-      "{}, ",
-      bytes_to_string_converter::get_string_from_bytes(subticket)
-    )
+  for subticket_id in &ticket.subtickets {
+    print!("{}, ", subticket_id.to_string())
   }
   print!("]\n");
 }

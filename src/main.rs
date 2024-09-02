@@ -7,7 +7,6 @@ use models::{app_state::AppState, ticket::Ticket};
 use user_input_acceptors::stdin_intro_worker;
 use workers::{stdin_ticket_creating_worker, ticket_creating_worker::TicketCreatingWorker};
 
-pub mod adapters;
 pub mod data_accessors;
 pub mod models;
 pub mod ticket_handling_worker;
@@ -15,8 +14,8 @@ pub mod ticket_reading_worker;
 pub mod ticket_saver;
 pub mod ticket_serializer;
 pub mod user_input_acceptors;
-pub mod workers;
 pub mod view_providers;
+pub mod workers;
 
 pub fn main() {
   let mut app_state = AppState::new();
@@ -48,7 +47,7 @@ pub fn main() {
       }
       AppState::ReadingTicket => match ticket_reading_worker::read_ticket() {
         Ok(t) => {
-          println!("ticket id read as: {}", t.get_id_as_string());
+          println!("ticket id read as: {}", t.id.to_string());
           current_ticket = Some(t);
           app_state = AppState::HandlingTicket;
         }

@@ -3,7 +3,6 @@ use std::{
 };
 
 use crate::{
-  adapters::bytes_to_string_converter,
   data_accessors::{const_str_schedule_state_provider, path_provider},
   models::{app_state::AppState, schedule_state::ScheduleState, ticket::Ticket},
   user_input_acceptors::{stdin_input_getter, stdin_ticket_id_getter}, view_providers::{stdout_subticket_view_provider, subticket_view_provider},
@@ -11,7 +10,7 @@ use crate::{
 
 pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, AppState), Box<dyn Error>> {
   // stdout specific view for prompting user for next action
-  println!("\nokay, lets work on ticket {}", ticket.get_id_as_string());
+  println!("\nokay, lets work on ticket {}", ticket.id.to_string());
   print!("what would you like to do?");
   print!(
     "
@@ -53,7 +52,7 @@ pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, AppState), Box<dyn Erro
 fn add_subticket_id(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
   stdout_subticket_view_provider::display_subtickets_short(ticket);
   println!("Please enter the ticket id you'd like to add as a subticket:");
-  let ticket_id = stdin_ticket_id_getter::get_ticket_id()?.1;
+  let ticket_id = stdin_ticket_id_getter::get_ticket_id()?;
   let mut t = ticket.clone();
   t.subtickets.push(ticket_id);
   Ok(t)
@@ -66,14 +65,14 @@ fn remove_subticket_id(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
 
 fn read_ticket(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
   println!();
-  println!("id............: {}", ticket.get_id_as_string());
+  println!("id............: {}", ticket.id.to_string());
   println!("schedule state: {}", ticket.schedule_state);
   println!(
     "subtickets....: {:?}",
     ticket
       .subtickets
       .iter()
-      .map(|x| bytes_to_string_converter::get_string_from_bytes(x))
+      .map(|x| x.to_string())
       .collect::<Vec<String>>()
   );
   println!("estimate......: {}", {
@@ -108,7 +107,7 @@ fn change_estimate(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
 }
 
 fn change_description(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
-  let temp_file_path = &path_provider::get_temp_file_path(&ticket.get_id_as_string());
+  let temp_file_path = &path_provider::get_temp_file_path(&&ticket.id.to_string());
   {
     let mut file = File::create(temp_file_path)?;
     file.write_all(ticket.description.as_bytes())?;
