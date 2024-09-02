@@ -3,16 +3,16 @@ use std::{
   io::{self},
 };
 
+use data_accessors::ticket_da;
 use models::{app_state::AppState, ticket::Ticket};
 use user_input_acceptors::stdin_intro_worker;
-use workers::{stdin_ticket_creating_worker, ticket_creating_worker::TicketCreatingWorker};
+use workers::{
+  stdin_ticket_creating_worker, ticket_creating_worker::TicketCreatingWorker,
+  ticket_handling_worker, ticket_reading_worker,
+};
 
 pub mod data_accessors;
 pub mod models;
-pub mod ticket_handling_worker;
-pub mod ticket_reading_worker;
-pub mod ticket_saver;
-pub mod ticket_serializer;
 pub mod user_input_acceptors;
 pub mod view_providers;
 pub mod workers;
@@ -60,7 +60,10 @@ pub fn main() {
         Some(ref ticket) => match ticket_handling_worker::handle_ticket(ticket) {
           Ok(t) => {
             app_state = t.1;
-            ticket_saver::save_ticket(&t.0);
+            match ticket_da::save_ticket(&t.0) {
+              Ok(_) => (),
+              Err(e) => println!("{}", e),
+            }
             current_ticket = Some(t.0);
           }
           Err(e) => {
@@ -80,7 +83,10 @@ pub fn main() {
           println!("Error was: {}", *x);
         }
         if let Some(ref x) = current_ticket {
-          ticket_saver::save_ticket(x);
+          match ticket_da::save_ticket(x) {
+            Ok(_) => (),
+            Err(e) => println!("{}", e),
+          }
         }
         break;
       }

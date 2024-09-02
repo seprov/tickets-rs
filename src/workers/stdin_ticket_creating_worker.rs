@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use crate::{
-  data_accessors::json_ticket_id_validator, models::ticket::Ticket, ticket_serializer,
+  data_accessors::{json_ticket_id_validator, ticket_da}, models::ticket::Ticket,
   user_input_acceptors::stdin_ticket_id_getter,
 };
 
@@ -28,7 +28,7 @@ impl TicketCreatingWorker for StdinTicketCreatingWorker {
     // stdout specific view
     println!("creating ticket");
     // ticket json datastore specific ticket saving
-    ticket_serializer::serialize(&file_path, &ticket)?;
+    ticket_da::save_ticket(&ticket)?;
     // stdout specific view
     println!("created ticket: {}", id_string);
 
