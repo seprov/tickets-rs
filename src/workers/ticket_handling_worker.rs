@@ -1,11 +1,18 @@
 use std::{
-  collections::BTreeMap, error::Error, fs::{remove_file, File}, io::{self, Read, Write}, process::Command
+  collections::BTreeMap,
+  error::Error,
+  fs::{remove_file, File},
+  io::{self, Read, Write},
+  process::Command,
 };
 
 use crate::{
   data_accessors::{const_str_schedule_state_provider, path_provider},
-  models::{app_state::AppState, schedule_state::ScheduleState, ticket::Ticket},
-  user_input_acceptors::{stdin_input_getter, stdin_ticket_id_getter}, view_providers::{stdout_subticket_view_provider, subticket_view_provider},
+  models::{
+    app_state::AppState, schedule_state::ScheduleState, ticket::Ticket, ticket_id::TicketId,
+  },
+  user_input_acceptors::{stdin_input_getter, stdin_ticket_id_getter},
+  view_providers::{stdout_subticket_view_provider, subticket_view_provider},
 };
 
 pub fn handle_ticket(ticket: &Ticket) -> Result<(Ticket, AppState), Box<dyn Error>> {
@@ -58,9 +65,26 @@ fn add_subticket_id(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
   Ok(t)
 }
 
+fn del_st_id(value: &String, ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
+  Ok(Ticket {
+    subtickets: ticket
+      .subtickets
+      .iter()
+      .filter(|x| (**x).to_string() != *value)
+      .map(|x| x.clone())
+      .collect::<Vec<TicketId>>(),
+    ..ticket.clone()
+  })
+}
+
 fn remove_subticket_id(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
-  stdout_subticket_view_provider::display_subtickets_short(ticket);
-  todo!()
+  println!("choose the subticket you'd like to remove:");
+  let strings = &ticket
+    .subtickets
+    .iter()
+    .map(|x| x.to_string())
+    .collect::<Vec<String>>();
+  do_mapping(strings, ticket, del_st_id)
 }
 
 fn read_ticket(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
@@ -143,14 +167,19 @@ fn validate_exit_status(status: std::process::ExitStatus) -> Result<(), Box<dyn 
   }
 }
 
-fn change_schedule_state(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
-  println!(
-    "your ticket's schedule state is currently: {}",
-    ticket.schedule_state
-  );
-  println!("what schedule state do you want?");
-  let schedule_states = const_str_schedule_state_provider::get_schedule_states();
-  let mapping = get_character_schedule_state_mapping(&schedule_states);
+fn set_schedule_state(value: &String, ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
+  return Ok(Ticket {
+    schedule_state: (ScheduleState::from_str(value)),
+    ..ticket.clone()
+  });
+}
+
+fn do_mapping(
+  strings: &[String],
+  ticket: &Ticket,
+  fun: impl Fn(&String, &Ticket) -> Result<Ticket, Box<dyn Error>>,
+) -> Result<Ticket, Box<dyn Error>> {
+  let mapping = get_character_string_mapping(strings);
   for (c, s) in &mapping {
     println!("  {}: {}", c, s)
   }
@@ -158,10 +187,7 @@ fn change_schedule_state(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
   for c in mapping.keys() {
     if input == *c {
       if let Some(value) = mapping.get(c) {
-        return Ok::<Ticket, Box<dyn Error>>(Ticket {
-          schedule_state: (value.to_owned()),
-          ..ticket.clone()
-        });
+        return fun(value, ticket);
       } else {
         continue;
       }
@@ -175,11 +201,22 @@ fn change_schedule_state(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
   )))
 }
 
-fn get_character_schedule_state_mapping(
-  schedule_states: &[ScheduleState],
-) -> BTreeMap<char, ScheduleState> {
+fn change_schedule_state(ticket: &Ticket) -> Result<Ticket, Box<dyn Error>> {
+  println!(
+    "your ticket's schedule state is currently: {}",
+    ticket.schedule_state
+  );
+  println!("what schedule state do you want?");
+  let strings = const_str_schedule_state_provider::get_schedule_states()
+    .iter()
+    .map(|s| (**s).clone())
+    .collect::<Vec<String>>();
+  do_mapping(&strings, ticket, set_schedule_state)
+}
+
+fn get_character_string_mapping(strings: &[String]) -> BTreeMap<char, String> {
   let mut current_byte = b'a' - 1;
-  schedule_states
+  strings
     .iter()
     .map(|s| {
       current_byte += 1;
