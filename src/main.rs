@@ -3,12 +3,15 @@ use std::{
   io::{self},
 };
 
-use data_accessors::{json_ticket_da, ticket_da::TicketDa};
+use data_accessors::{
+  json_ticket_da, json_ticket_list_provider::JsonTicketListProvider, ticket_da::TicketDa,
+};
 use models::{app_state::AppState, ticket::Ticket};
+use view_providers::stdout_ticket_list_view_provider::StdoutTicketListViewProvider;
 use workers::{
   stdin_intro_worker, stdin_ticket_creating_worker::StdinTicketCreatingWorker,
   ticket_creating_worker::TicketCreatingWorker, ticket_handling_worker,
-  ticket_reading_worker::TicketReadingWorker,
+  ticket_listing_worker::TicketListingWorker, ticket_reading_worker::TicketReadingWorker,
 };
 
 pub mod data_accessors;
@@ -25,6 +28,12 @@ pub fn main() {
   let ticket_da = json_ticket_da::JsonTicketDa {};
   let ticket_reading_worker = TicketReadingWorker::new(&ticket_da);
   let ticket_creating_worker = StdinTicketCreatingWorker::new(&ticket_da);
+
+  let ticket_list_view_provider = StdoutTicketListViewProvider;
+  let ticket_list_provider = JsonTicketListProvider;
+  let ticket_listing_worker =
+    TicketListingWorker::new(&ticket_list_provider, &ticket_list_view_provider);
+
   loop {
     match app_state {
       AppState::Greeting => {
@@ -37,9 +46,13 @@ pub fn main() {
           }
         }
       }
-      AppState::ListingTickets => {
-        todo!()
-      }
+      AppState::ListingTickets => match ticket_listing_worker.list_tickets() {
+        Ok(_) => app_state = AppState::Greeting,
+        Err(e) => {
+          current_error = Some(e);
+          app_state = AppState::WrappingUp;
+        }
+      },
       AppState::CreatingTicket => match ticket_creating_worker.create_ticket() {
         Ok(t) => {
           current_ticket = Some(t);
