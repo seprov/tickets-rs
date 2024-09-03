@@ -1,6 +1,6 @@
 use std::{fmt::Display, ops::Deref};
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct TicketId {
   value: [u8; 8],
 }
