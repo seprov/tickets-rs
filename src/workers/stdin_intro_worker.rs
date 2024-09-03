@@ -20,7 +20,7 @@ pub fn prompt_for_activity() -> Result<AppState, Box<dyn Error>> {
   match c {
     't' => Ok(AppState::CreatingTicket),
     'u' => Ok(AppState::ReadingTicket),
-    'l' => todo!(),
+    'l' => Ok(AppState::ListingTickets),
     'q' => Ok(AppState::WrappingUp),
     _ => todo!(),
   }

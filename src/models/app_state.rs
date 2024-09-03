@@ -5,6 +5,7 @@ pub enum AppState {
   ReadingTicket,
   WrappingUp,
   HandlingTicket,
+  ListingTickets,
 }
 
 impl AppState {

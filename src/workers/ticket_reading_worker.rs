@@ -1,16 +1,24 @@
 use std::error::Error;
 
-use crate::{ data_accessors::ticket_da, models::{ticket::Ticket, ticket_id::TicketId}, user_input_acceptors::stdin_ticket_id_getter};
+use crate::{
+  data_accessors::{json_ticket_da::JsonTicketDa, ticket_da::TicketDa},
+  models::ticket::Ticket,
+  user_input_acceptors::stdin_ticket_id_getter,
+};
 
-
-// create struct and trait impl
-pub fn read_ticket() -> Result<Ticket, Box<dyn Error>> {
-  println!("what's your ticket id?");
-  let input = stdin_ticket_id_getter::get_ticket_id()?;
-  get_ticket(input)
+pub struct TicketReadingWorker<'a> {
+  ticket_da: &'a dyn TicketDa,
 }
 
-// create struct and trait impl
-pub fn get_ticket(input: TicketId) -> Result<Ticket, Box<dyn Error>> {
-  Ok(ticket_da::load_ticket(&input)?)
+impl<'a> TicketReadingWorker<'a> {
+  // create struct and trait impl
+  pub fn read_ticket(&self) -> Result<Ticket, Box<dyn Error>> {
+    println!("what's your ticket id?");
+    let input = stdin_ticket_id_getter::get_ticket_id()?;
+    Ok(self.ticket_da.load_ticket(&input)?)
+  }
+
+  pub fn new(ticket_da: &'a JsonTicketDa) -> Self {
+    Self { ticket_da }
+  }
 }

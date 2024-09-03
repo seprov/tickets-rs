@@ -1,16 +1,24 @@
 use std::error::Error;
 
 use crate::{
-  data_accessors::{json_ticket_id_validator, ticket_da}, models::ticket::Ticket,
+  data_accessors::{json_ticket_da::JsonTicketDa, json_ticket_id_validator, ticket_da::TicketDa},
+  models::ticket::Ticket,
   user_input_acceptors::stdin_ticket_id_getter,
 };
 
 use super::ticket_creating_worker::TicketCreatingWorker;
 
-pub struct StdinTicketCreatingWorker {}
+pub struct StdinTicketCreatingWorker<'a> {
+  ticket_da: &'a dyn TicketDa,
+}
+impl<'a> StdinTicketCreatingWorker<'a> {
+  pub(crate) fn new(ticket_da: &'a JsonTicketDa) -> Self {
+    Self { ticket_da }
+  }
+}
 
-impl TicketCreatingWorker for StdinTicketCreatingWorker {
-  fn create_ticket() -> Result<Ticket, Box<dyn Error>> {
+impl<'a> TicketCreatingWorker for StdinTicketCreatingWorker<'a> {
+  fn create_ticket(&self) -> Result<Ticket, Box<dyn Error>> {
     // stdout specific view for creating ticket
     println!("please enter a ticket id for your new ticket");
     // stdin specific user input for getting ticket id
@@ -26,8 +34,8 @@ impl TicketCreatingWorker for StdinTicketCreatingWorker {
     // stdout specific view
     println!("creating ticket");
 
-    ticket_da::save_ticket(&ticket)?;
-    
+    self.ticket_da.save_ticket(&ticket)?;
+
     // stdout specific view
     println!("created ticket: {}", id_string);
 

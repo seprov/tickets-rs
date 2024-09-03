@@ -3,12 +3,12 @@ use std::{
   io::{self},
 };
 
-use data_accessors::ticket_da;
+use data_accessors::{json_ticket_da, ticket_da::TicketDa};
 use models::{app_state::AppState, ticket::Ticket};
-use user_input_acceptors::stdin_intro_worker;
 use workers::{
-  stdin_ticket_creating_worker, ticket_creating_worker::TicketCreatingWorker,
-  ticket_handling_worker, ticket_reading_worker,
+  stdin_intro_worker, stdin_ticket_creating_worker::StdinTicketCreatingWorker,
+  ticket_creating_worker::TicketCreatingWorker, ticket_handling_worker,
+  ticket_reading_worker::TicketReadingWorker,
 };
 
 pub mod data_accessors;
@@ -21,6 +21,10 @@ pub fn main() {
   let mut app_state = AppState::new();
   let mut current_ticket = Option::<Ticket>::None;
   let mut current_error = Option::<Box<dyn Error>>::None;
+
+  let ticket_da = json_ticket_da::JsonTicketDa {};
+  let ticket_reading_worker = TicketReadingWorker::new(&ticket_da);
+  let ticket_creating_worker = StdinTicketCreatingWorker::new(&ticket_da);
   loop {
     match app_state {
       AppState::Greeting => {
@@ -33,19 +37,20 @@ pub fn main() {
           }
         }
       }
-      AppState::CreatingTicket => {
-        match stdin_ticket_creating_worker::StdinTicketCreatingWorker::create_ticket() {
-          Ok(t) => {
-            current_ticket = Some(t);
-            app_state = AppState::HandlingTicket;
-          }
-          Err(e) => {
-            current_error = Some(e);
-            app_state = AppState::WrappingUp;
-          }
-        }
+      AppState::ListingTickets => {
+        todo!()
       }
-      AppState::ReadingTicket => match ticket_reading_worker::read_ticket() {
+      AppState::CreatingTicket => match ticket_creating_worker.create_ticket() {
+        Ok(t) => {
+          current_ticket = Some(t);
+          app_state = AppState::HandlingTicket;
+        }
+        Err(e) => {
+          current_error = Some(e);
+          app_state = AppState::WrappingUp;
+        }
+      },
+      AppState::ReadingTicket => match ticket_reading_worker.read_ticket() {
         Ok(t) => {
           println!("ticket id read as: {}", t.id.to_string());
           current_ticket = Some(t);
@@ -60,7 +65,7 @@ pub fn main() {
         Some(ref ticket) => match ticket_handling_worker::handle_ticket(ticket) {
           Ok(t) => {
             app_state = t.1;
-            match ticket_da::save_ticket(&t.0) {
+            match ticket_da.save_ticket(&t.0) {
               Ok(_) => (),
               Err(e) => println!("{}", e),
             }
@@ -83,7 +88,7 @@ pub fn main() {
           println!("Error was: {}", *x);
         }
         if let Some(ref x) = current_ticket {
-          match ticket_da::save_ticket(x) {
+          match ticket_da.save_ticket(x) {
             Ok(_) => (),
             Err(e) => println!("{}", e),
           }
