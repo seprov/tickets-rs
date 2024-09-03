@@ -9,24 +9,17 @@ use serde::{
   Deserialize, Deserializer, Serialize,
 };
 
+use crate::data_accessors::const_str_schedule_state_provider;
+
 #[derive(Clone, Eq, PartialEq, Hash, PartialOrd)]
 pub struct ScheduleState {
   value: Rc<String>,
-  position: Option<i8>,
 }
 
 impl Ord for ScheduleState {
   fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-    match self.position {
-      Some(s) => match other.position {
-        Some(o) => s.cmp(&o),
-        None => std::cmp::Ordering::Greater,
-      },
-      None => match other.position {
-        Some(_) => std::cmp::Ordering::Less,
-        None => std::cmp::Ordering::Equal,
-      },
-    }
+    const_str_schedule_state_provider::get_schedule_state_position(self)
+      .cmp(&const_str_schedule_state_provider::get_schedule_state_position(other))
   }
 }
 
@@ -66,7 +59,6 @@ impl<'de> Deserialize<'de> for ScheduleState {
       {
         Ok(ScheduleState {
           value: Rc::new(v.to_owned()),
-          position: None,
         })
       }
 
@@ -74,10 +66,7 @@ impl<'de> Deserialize<'de> for ScheduleState {
       where
         E: de::Error,
       {
-        Ok(ScheduleState {
-          value: Rc::new(v),
-          position: None,
-        })
+        Ok(ScheduleState { value: Rc::new(v) })
       }
     }
 
@@ -89,7 +78,6 @@ impl ScheduleState {
   pub fn from_str(s: &str) -> Self {
     ScheduleState {
       value: Rc::new(s.to_owned()),
-      position: None,
     }
   }
 }

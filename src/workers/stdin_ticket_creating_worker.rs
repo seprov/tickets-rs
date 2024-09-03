@@ -2,7 +2,7 @@ use std::error::Error;
 
 use crate::{
   data_accessors::{json_ticket_da::JsonTicketDa, json_ticket_id_validator, ticket_da::TicketDa},
-  models::ticket::Ticket,
+  models::{schedule_state::ScheduleState, ticket::Ticket},
   user_input_acceptors::stdin_ticket_id_getter,
 };
 
@@ -29,7 +29,7 @@ impl<'a> TicketCreatingWorker for StdinTicketCreatingWorker<'a> {
     // ticket json datastore specific ticket already exists validation
     json_ticket_id_validator::ticket_already_exists(&ticket_id)?;
 
-    let ticket = Ticket::new(ticket_id, "Idea".to_owned());
+    let ticket = Ticket::new(ticket_id, ScheduleState::from_str("Idea"));
 
     // stdout specific view
     println!("creating ticket");

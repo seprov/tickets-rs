@@ -38,7 +38,6 @@ impl StdoutTicketListViewProvider {
   fn add_ticket_to_btree(&self, ticket: &Ticket, map: &mut BTreeMap<ScheduleState, Vec<TicketId>>) {
     map
       .entry(ticket.schedule_state.clone())
-      .or_insert(Vec::new())
-      .push(ticket.id.clone());
+      .and_modify(|c| c.push(ticket.id.clone()));
   }
 }

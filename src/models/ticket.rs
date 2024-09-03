@@ -20,10 +20,10 @@ pub struct Ticket {
 }
 
 impl Ticket {
-  pub fn new(id: TicketId, schedule_state: String) -> Self {
+  pub fn new(id: TicketId, schedule_state: ScheduleState) -> Self {
     Self {
       id,
-      schedule_state: ScheduleState::from_str(&schedule_state),
+      schedule_state: schedule_state,
       description: "".to_owned(),
       estimate: None,
       subtickets: Vec::new(),
